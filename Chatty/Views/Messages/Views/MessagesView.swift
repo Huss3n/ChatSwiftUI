@@ -7,7 +7,9 @@
 
 import SwiftUI
 
-struct Messages: View {
+struct MessagesView: View {
+    @StateObject private var messagesVM = MessagesViewModel()
+    
     var body: some View {
         ScrollView {
             VStack {
@@ -16,17 +18,13 @@ struct Messages: View {
                 }
             }
             .navigationTitle("Chats")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Image(systemName: "pen")
-                }
-            }
         }
     }
 }
 
 #Preview {
     NavigationStack {
-        Messages()
+        MessagesView()
     }
 }
+
