@@ -9,15 +9,29 @@ import SwiftUI
 
 struct MessagesView: View {
     @StateObject private var messagesVM = MessagesViewModel()
+    @State private var addChat: Bool = false
     
     var body: some View {
         ScrollView {
-            VStack {
-                ForEach(0..<20) { _ in
-                    MessageRow()
+            NavigationStack {
+                VStack {
+                    ForEach(0..<20) { _ in
+                        MessageRow()
+                    }
                 }
+                .navigationTitle("Chats")
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Image(systemName: "square.and.pencil")
+                            .onTapGesture {
+                                addChat.toggle()
+                            }
+                    }
+                }
+                .sheet(isPresented: $addChat, content: {
+                    AddChatUsers()
+                })
             }
-            .navigationTitle("Chats")
         }
     }
 }

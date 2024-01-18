@@ -8,45 +8,61 @@
 import SwiftUI
 
 struct LoginView: View {
-    @EnvironmentObject private var authModel: AuthModel
+    @StateObject private var loginVM = LoginViewModel()
+    @Binding var isUserSignedIn: Bool
+    @Binding var viewChange: Bool
+    @State private var loginErrorMessage = ""
     
     var body: some View {
-        VStack(spacing: 0) {
-            lineThrough
+        VStack(alignment: .leading, spacing: 9) {
             
-            email
-            password
-            loginButton
-            signUpUser
+            Image("chatty")
+                .padding(.leading)
             
+            Text("Swift Talk")
+                .font(.title)
+                .fontWeight(.heavy)
+                .padding(.leading)
+                
+            
+            Text("Your Express Lane to Engaging Conversations!")
+                .font(.caption)
+                .fontDesign(.monospaced)
+                .padding(.leading)
+            
+            VStack {
+                email
+                password
+                
+                Text(loginErrorMessage)
+                    .foregroundStyle(.red)
+                    .font(.callout)
+                    .frame(height: 10)
+                    .opacity(loginErrorMessage.isEmpty ? 0 : 1)
+                
+                loginButton
+                signUpUser
+            }
             Spacer()
             
         }
         .padding(5)
         .padding(.top, 20)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(
-            LinearGradient(colors: [.blue, .green, .red], startPoint: .topLeading, endPoint: .bottomTrailing)
-        )
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Text("Log In")
-                    .font(.title.bold())
-                    .padding(.leading, 4)
-            }
-        }
+        .background(.gray.opacity(0.3))
     }
 }
 
 #Preview {
     NavigationStack {
-        LoginView()
-            .environmentObject(AuthModel())
+        LoginView(isUserSignedIn: .constant(false), viewChange: .constant(true))
     }
 }
 
 
 extension LoginView {
+    
+    // MARK: Line through
     private var lineThrough: some View {
         Rectangle()
             .frame(height: 2)
@@ -56,10 +72,11 @@ extension LoginView {
     }
     
     
+    // MARK: Email
     private var email: some View {
-        TextField("Email", text: $authModel.email)
+        TextField("Email", text: $loginVM.email)
             .keyboardType(.emailAddress)
-            .textInputAutocapitalization(.none)
+            .textInputAutocapitalization(.never)
             .padding(.leading)
             .font(.headline)
             .foregroundStyle(.primary)
@@ -70,10 +87,11 @@ extension LoginView {
             .padding(5)
             .padding(.top, 20)
     }
-
     
+    
+    // MARK: Password
     private var password: some View {
-        SecureField("Password", text: $authModel.password)
+        SecureField("Password", text: $loginVM.password)
             .padding(.leading)
             .font(.headline)
             .foregroundStyle(.primary)
@@ -84,9 +102,19 @@ extension LoginView {
             .padding(5)
     }
     
+    // MARK: login Button
     private var loginButton: some View {
         Button(action: {
-            
+            Task {
+                do {
+                    try await loginVM.login()
+                    withAnimation(.spring) {
+                        isUserSignedIn = true
+                    }
+                }catch InputErrors.emptyfields {
+                    loginErrorMessage = "Fill in the required fields"
+                }
+            }
         }, label: {
             Text("Login")
                 .font(.headline)
@@ -99,12 +127,15 @@ extension LoginView {
         })
     }
     
+    
+    // MARK: Sign up User link
     private var signUpUser: some View {
-        NavigationLink("Don't have an account? Sign Up") {
-            SignUpView()
-                .environmentObject(AuthModel())
-                .navigationBarBackButtonHidden(true)
-        }
-        .foregroundStyle(.white)
+        Text("Don't have an account? Sign Up")
+            .onTapGesture {
+                withAnimation(.easeInOut) {
+                    viewChange = false
+                }
+            }
+            .foregroundStyle(.black)
     }
 }

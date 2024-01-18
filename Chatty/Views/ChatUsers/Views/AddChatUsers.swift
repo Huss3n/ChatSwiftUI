@@ -8,8 +8,34 @@
 import SwiftUI
 
 struct AddChatUsers: View {
+    @StateObject private var addVM = AddUsersVm()
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack(alignment: .leading) {
+            ForEach(addVM.users) { user in
+                HStack(alignment: .center) {
+                    AsyncImage(url: URL(string: user.displayPhoto)) { image in
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 50, height: 50)
+                            .clipShape(RoundedRectangle(cornerRadius: 75))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 75)
+                                    .stroke(.black, lineWidth: 1.0)
+                            }
+                        
+                    } placeholder: {
+                        ProgressView()
+                    }
+                    
+                    Text(user.displayName)
+
+                    Spacer()
+                }
+            }
+        }
+        .padding()
     }
 }
 
